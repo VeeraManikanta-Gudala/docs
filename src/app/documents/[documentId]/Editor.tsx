@@ -1,25 +1,53 @@
-"use client";
+'use client';
+import { useEffect, useRef } from 'react';
 
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+export default function Editor() {
+  const editorRef = useRef();
 
-const Editor = () => {
-    const editor = useEditor({
-        extensions: [StarterKit],
-        editorProps:{
-            attributes:{
-                style: "padding-left: 56px, padding-right: 56px",
-                class: 'focus:outline-none print:border-0 bg-white border-[#c7c7c7] flex flex col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text'
-            }
-        }
-    });
+  const format = (command) => {
+    document.execCommand(command, false, null);
+    editorRef.current.focus();
+  };
 
-    return (
-        <div className="size-full overflow-x-auto bg-[#F9FAFB] p-4 print:p-0 print:bg-white print:overflow-visible">
-            <div className='min-w-max flex justify-center w-[816px] p-4 print:py-0 mx-auto print:w-full print:min-w-0'>
-                <EditorContent editor={editor} />
-                </div>
-        </div>
-    )
+  const handleKeyDown = (e) => {
+    if (e.ctrlKey) {
+      if (e.key === 'b') {
+        e.preventDefault();
+        format('bold');
+      }
+      if (e.key === 'i') {
+        e.preventDefault();
+        format('italic');
+      }
+      if (e.key === 'u') {
+        e.preventDefault();
+        format('underline');
+      }
+    }
+  };
+
+  useEffect(() => {
+    const el = editorRef.current;
+    el.addEventListener('keydown', handleKeyDown);
+    return () => el.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-8 space-y-4">
+      <div className="space-x-2">
+        <button onClick={() => format('bold')} className="btn">Bold</button>
+        <button onClick={() => format('italic')} className="btn">Italic</button>
+        <button onClick={() => format('underline')} className="btn">Underline</button>
+      </div>
+
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        className="w-[210mm] h-[297mm] bg-white shadow-md border border-gray-300 p-12 text-base leading-relaxed outline-none"
+      >
+        Start writing here...
+      </div>
+    </div>
+  );
 }
-export default Editor;
